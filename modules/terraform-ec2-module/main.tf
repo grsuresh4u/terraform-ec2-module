@@ -1,3 +1,7 @@
+data "aws_kms_key" "ebs" {
+  key_id = "alias/aws/ebs"
+}
+
 resource "aws_iam_role" "this" {
   name = var.iam_role_name
 
@@ -54,6 +58,7 @@ resource "aws_instance" "this" {
     volume_size           = var.root_volume_size
     volume_type           = "gp3"
     encrypted             = true
+    kms_key_id            = data.aws_kms_key.ebs.arn
     delete_on_termination = true
   }
 
@@ -65,6 +70,7 @@ resource "aws_ebs_volume" "data" {
   size              = var.data_volume_size
   type              = "gp3"
   encrypted         = true
+  kms_key_id        = data.aws_kms_key.ebs.arn
   tags              = merge(var.tags, { Name = "${lookup(var.tags, "Name", "instance")}-data" })
 }
 
